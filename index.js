@@ -31,11 +31,13 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const today = new Date();
-    const billingCycle = '01';
+    const billingCycle = 1;
+    let formattedBilling = billingCycle < 10 ? billingCycle.toString().padStart(2, '0') : billingCycle;
     const startDate = today.toLocaleDateString('en-US', {day: '2-digit', month: '2-digit', year: 'numeric'}).replaceAll('/', '');
-    today.setMonth(today.getMonth() + 1);
+    today.setMonth(today.getMonth() + billingCycle);
     const endDate = today.toLocaleDateString('en-US', {day: '2-digit', month: '2-digit', year: 'numeric'}).replaceAll('/', '');
-    const uniqueName = `${billingCycle}${startDate}${endDate}`;
+    
+    const uniqueName = `${formattedBilling}${startDate}${endDate}`;
     cb(null, uniqueName);  // Unique file name
   },
 });
