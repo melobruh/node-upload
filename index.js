@@ -10,10 +10,7 @@ const app = express();
 //connection to mongo
 const connect = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/fileUpload', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect('mongodb://localhost:27017/fileUpload');
     console.log('Connected to MongoDB');
   } catch (err) {
     console.error('Error connecting to MongoDB:', err);
@@ -33,7 +30,13 @@ const storage = multer.diskStorage({
     cb(null, 'uploads');  // Files will be stored in the 'uploads' directory
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));  // Unique file name
+    const today = new Date();
+    const billingCycle = '01';
+    const startDate = today.toLocaleDateString('en-US', {day: '2-digit', month: '2-digit', year: 'numeric'}).replaceAll('/', '');
+    today.setMonth(today.getMonth() + 1);
+    const endDate = today.toLocaleDateString('en-US', {day: '2-digit', month: '2-digit', year: 'numeric'}).replaceAll('/', '');
+    const uniqueName = `${billingCycle}${startDate}${endDate}`;
+    cb(null, uniqueName);  // Unique file name
   },
 });
 
@@ -60,9 +63,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
       await newFile.save();
 
-      res.status(200).send('File uploaded successfully');
+      res.status(200).send(`File uploaded successfully ${req.file.filename}`);
   } catch (err) {
-    res.status(500).send('Error uploading file/Unsupported file type');
+    res.status(500).send('Error uploading file');
   }
 });
 
